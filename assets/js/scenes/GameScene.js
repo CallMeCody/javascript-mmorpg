@@ -12,9 +12,9 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
+    this.createMap();
     this.createAudio();
     this.createChests();
-    this.createWalls();
     this.createPlayer();
     this.addCollisions();
     this.createInput();
@@ -29,7 +29,7 @@ class GameScene extends Phaser.Scene {
   }
 
   createPlayer() {
-    this.player = new Player(this, 32, 32, 'characters', 0);
+    this.player = new Player(this, 224, 224, 'characters', 0);
   }
 
   createChests() {
@@ -59,17 +59,14 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  createWalls() {
-    this.wall = this.physics.add.image(500, 100, 'button1');
-    this.wall.setImmovable();
-  }
-
   createInput() {
     this.cursors = this.input.keyboard.createCursorKeys();
   }
 
   addCollisions() {
-    this.physics.add.collider(this.player, this.wall);
+    // check for collision between player and the Tiled blocked layer
+    this.physics.add.collider(this.player, this.blockedLayer);
+    // check for overlap between player and chest game objects
     this.physics.add.overlap(this.player, this.chests, this.collectChest, null, this);
   }
 
@@ -84,5 +81,27 @@ class GameScene extends Phaser.Scene {
     chest.makeInactive();
     // spawn a new chest
     this.time.delayedCall(1000, this.spawnChest, [], this);
+  }
+
+  createMap() {
+    // create the tile map
+    this.map = this.make.tilemap({ key: 'map' });
+    // add the tileset image to our map
+    this.tiles = this.map.addTilesetImage('background', 'background', 32, 32, 1, 2);
+    // create background layer
+    this.backgroundLayer = this.map.createStaticLayer('background', this.tiles, 0, 0);
+    this.backgroundLayer.setScale(2);
+
+    // create blocked layer
+    this.blockedLayer = this.map.createStaticLayer('blocked', this.tiles, 0, 0);
+    this.blockedLayer.setScale(2);
+    this.blockedLayer.setCollisionByExclusion([-1]);
+
+    // update the world bounds
+    this.physics.world.bounds.width = this. map.widthInPixles * 2;
+    this.physics.world.bounds.height = this. map.heightInPixles * 2;
+
+    // limit the camera to the size of the map
+    this.cameras.main.setBounds(0, 0, this.map.widthInPixles * 2, this.map.heightInPixles * 2,);
   }
 }
