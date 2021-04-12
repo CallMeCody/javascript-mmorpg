@@ -1,5 +1,4 @@
-# javascript-mmorpg
-MMORPG made with JavaScript and the Phaser 3 library
+# javascript-mmorpg-test
 
 Scenes:
   - Boot: load assets
